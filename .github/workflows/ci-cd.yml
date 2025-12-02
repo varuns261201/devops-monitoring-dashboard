@@ -139,11 +139,13 @@ jobs:
           version: "latest"
 
       - name: Configure kubectl (optional - for remote cluster)
-        if: ${{ secrets.KUBE_CONFIG }}
+        continue-on-error: true
         run: |
-          mkdir -p $HOME/.kube
-          echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > $HOME/.kube/config
-          chmod 600 $HOME/.kube/config
+          if [ -n "${{ secrets.KUBE_CONFIG }}" ]; then
+            mkdir -p $HOME/.kube
+            echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > $HOME/.kube/config
+            chmod 600 $HOME/.kube/config
+          fi
 
       - name: Update image tags in manifests
         run: |
@@ -206,9 +208,9 @@ jobs:
         run: |
           echo "### Deployment Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "*Commit:* ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "*Branch:* ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Images:**" >> $GITHUB_STEP_SUMMARY
-          echo "- Backend: \`${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE_NAME }}:main-${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- Frontend: \`${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:main-${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "*Images:*" >> $GITHUB_STEP_SUMMARY
+          echo "- Backend: \${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE_NAME }}:main-${{ github.sha }}\" >> $GITHUB_STEP_SUMMARY
+          echo "- Frontend: \${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:main-${{ github.sha }}\" >> $GITHUB_STEP_SUMMARY
