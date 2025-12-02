@@ -153,22 +153,22 @@ jobs:
 
       - name: Pull and load images into Minikube
         run: |
-          # Pull images first
-          docker pull ${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE_NAME }}:main-${{ github.sha }}
-          docker pull ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:main-${{ github.sha }}
+          # Pull latest images (just built in previous job)
+          docker pull ${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE_NAME }}:latest
+          docker pull ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:latest
 
           # Load into Minikube
-          minikube image load ${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE_NAME }}:main-${{ github.sha }}
-          minikube image load ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:main-${{ github.sha }}
+          minikube image load ${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE_NAME }}:latest
+          minikube image load ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:latest
 
           # Verify images are in Minikube
           minikube image ls | grep monitoring
 
       - name: Update image tags in manifests
         run: |
-          # Update to use the specific commit SHA images
-          sed -i "s|ghcr.io/YOUR_GITHUB_USERNAME/monitoring-backend:latest|${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE_NAME }}:main-${{ github.sha }}|g" k8s/backend-deployment.yaml
-          sed -i "s|ghcr.io/YOUR_GITHUB_USERNAME/monitoring-frontend:latest|${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:main-${{ github.sha }}|g" k8s/frontend-deployment.yaml
+          # Update to use latest images (simpler than commit SHA)
+          sed -i "s|ghcr.io/YOUR_GITHUB_USERNAME/monitoring-backend:latest|${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE_NAME }}:latest|g" k8s/backend-deployment.yaml
+          sed -i "s|ghcr.io/YOUR_GITHUB_USERNAME/monitoring-frontend:latest|${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:latest|g" k8s/frontend-deployment.yaml
           sed -i 's|imagePullPolicy: Always|imagePullPolicy: Never|g' k8s/backend-deployment.yaml
           sed -i 's|imagePullPolicy: Always|imagePullPolicy: Never|g' k8s/frontend-deployment.yaml
 
