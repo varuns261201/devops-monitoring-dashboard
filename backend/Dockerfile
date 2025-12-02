@@ -9,7 +9,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install only production dependencies
-RUN npm ci --only=production --ignore-scripts
+RUN npm install --production --ignore-scripts
 
 # ================================
 # Stage 2: Production Image
@@ -27,8 +27,8 @@ COPY . .
 
 # Create non-root user for security
 RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nodejs -u 1001 && \
-    chown -R nodejs:nodejs /app
+  adduser -S nodejs -u 1001 && \
+  chown -R nodejs:nodejs /app
 
 # Switch to non-root user
 USER nodejs
