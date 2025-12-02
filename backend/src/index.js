@@ -115,37 +115,39 @@ app.use((err, req, res, _next) => {
   });
 });
 
-// Start server
-const PORT = config.PORT;
-const server = app.listen(PORT, async () => {
-  console.log('========================================');
-  console.log('  Monitoring Backend API Started');
-  console.log('========================================');
-  console.log(`  Environment: ${config.NODE_ENV}`);
-  console.log(`  Port: ${PORT}`);
-  console.log(`  URL: http://localhost:${PORT}`);
-  console.log('========================================');
+// Start server only if not in test environment
+if (process.env.NODE_ENV !== 'test') {
+  const PORT = config.PORT;
+  const server = app.listen(PORT, async () => {
+    console.log('========================================');
+    console.log('  Monitoring Backend API Started');
+    console.log('========================================');
+    console.log(`  Environment: ${config.NODE_ENV}`);
+    console.log(`  Port: ${PORT}`);
+    console.log(`  URL: http://localhost:${PORT}`);
+    console.log('========================================');
 
-  // Connect to MongoDB
-  await connectDB();
+    // Connect to MongoDB
+    await connectDB();
 
-  console.log('  Available endpoints:');
-  console.log(`    GET  http://localhost:${PORT}/`);
-  console.log(`    GET  http://localhost:${PORT}/metrics`);
-  console.log(`    GET  http://localhost:${PORT}/metrics/history`);
-  console.log(`    GET  http://localhost:${PORT}/health`);
-  console.log(`    GET  http://localhost:${PORT}/info`);
-  console.log('========================================');
-});
-
-// Graceful shutdown
-process.on('SIGTERM', async () => {
-  console.log('SIGTERM received, shutting down gracefully...');
-  await disconnectDB();
-  server.close(() => {
-    console.log('Server closed');
-    process.exit(0);
+    console.log('  Available endpoints:');
+    console.log(`    GET  http://localhost:${PORT}/`);
+    console.log(`    GET  http://localhost:${PORT}/metrics`);
+    console.log(`    GET  http://localhost:${PORT}/metrics/history`);
+    console.log(`    GET  http://localhost:${PORT}/health`);
+    console.log(`    GET  http://localhost:${PORT}/info`);
+    console.log('========================================');
   });
-});
+
+  // Graceful shutdown
+  process.on('SIGTERM', async () => {
+    console.log('SIGTERM received, shutting down gracefully...');
+    await disconnectDB();
+    server.close(() => {
+      console.log('Server closed');
+      process.exit(0);
+    });
+  });
+}
 
 module.exports = app;
