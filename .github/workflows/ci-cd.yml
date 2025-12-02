@@ -147,11 +147,22 @@ jobs:
           kubectl cluster-info
           kubectl get nodes
 
-      - name: Load images into Minikube
+      - name: Log in to GHCR for image pull
         run: |
-          # Load images that were just built
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Pull and load images into Minikube
+        run: |
+          # Pull images first
+          docker pull ${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE_NAME }}:main-${{ github.sha }}
+          docker pull ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:main-${{ github.sha }}
+
+          # Load into Minikube
           minikube image load ${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE_NAME }}:main-${{ github.sha }}
           minikube image load ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:main-${{ github.sha }}
+
+          # Verify images are in Minikube
+          minikube image ls | grep monitoring
 
       - name: Update image tags in manifests
         run: |
