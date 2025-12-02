@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+  namespace: monitoring
+  labels:
+    app: backend
+    tier: api
+spec:
+  type: ClusterIP  # Internal service
+  selector:
+    app: backend
+    tier: api
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+    protocol: TCP
+  sessionAffinity: None

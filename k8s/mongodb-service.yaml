@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb
+  namespace: monitoring
+  labels:
+    app: mongodb
+    tier: database
+spec:
+  # Headless service - provides stable network identity for StatefulSet
+  clusterIP: None
+  selector:
+    app: mongodb
+    tier: database
+  ports:
+  - name: mongodb
+    port: 27017
+    targetPort: 27017
+    protocol: TCP
