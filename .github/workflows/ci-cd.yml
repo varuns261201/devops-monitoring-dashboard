@@ -42,7 +42,6 @@ jobs:
       - name: Run tests (backend only)
         if: matrix.component == 'backend'
         working-directory: ./backend
-        run: npm test -- --coverage
         env:
           NODE_ENV: test
         run: npm test -- --coverage --forceExit
