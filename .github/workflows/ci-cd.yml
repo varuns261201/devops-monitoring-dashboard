@@ -2,9 +2,9 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 env:
   REGISTRY: ghcr.io
@@ -21,7 +21,7 @@ jobs:
     strategy:
       matrix:
         component: [backend, frontend]
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -29,8 +29,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'npm'
+          node-version: "18"
+          cache: "npm"
           cache-dependency-path: ${{ matrix.component }}/package-lock.json
 
       - name: Install dependencies
@@ -63,7 +63,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -128,7 +128,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -136,10 +136,10 @@ jobs:
       - name: Setup kubectl
         uses: azure/setup-kubectl@v3
         with:
-          version: 'latest'
+          version: "latest"
 
       - name: Configure kubectl (optional - for remote cluster)
-        if: ${{ secrets.KUBE_CONFIG != '' }}
+        if: ${{ secrets.KUBE_CONFIG }}
         run: |
           mkdir -p $HOME/.kube
           echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > $HOME/.kube/config
@@ -149,10 +149,10 @@ jobs:
         run: |
           # Update backend image
           sed -i "s|monitoring-backend:latest|${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE_NAME }}:main-${{ github.sha }}|g" k8s/backend-deployment.yaml
-          
+
           # Update frontend image
           sed -i "s|monitoring-frontend:latest|${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:main-${{ github.sha }}|g" k8s/frontend-deployment.yaml
-          
+
           # Remove imagePullPolicy: Never for GHCR images
           sed -i '/imagePullPolicy: Never/d' k8s/backend-deployment.yaml
           sed -i '/imagePullPolicy: Never/d' k8s/frontend-deployment.yaml
@@ -184,10 +184,10 @@ jobs:
         run: |
           echo "=== Pods Status ==="
           kubectl get pods -n monitoring
-          
+
           echo "=== Services Status ==="
           kubectl get svc -n monitoring
-          
+
           echo "=== Deployment Status ==="
           kubectl get deployments -n monitoring
 
@@ -195,10 +195,10 @@ jobs:
         run: |
           # Get backend pod
           BACKEND_POD=$(kubectl get pod -n monitoring -l app=backend -o jsonpath="{.items[0].metadata.name}")
-          
+
           # Test health endpoint
           kubectl exec -n monitoring $BACKEND_POD -- wget -q -O- http://localhost:8080/health || exit 1
-          
+
           echo "✅ Smoke tests passed!"
 
       - name: Deployment summary
